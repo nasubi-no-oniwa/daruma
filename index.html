@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#f6eddc">
+<meta name="description" content="交互にダルマを落として4つ並べたら勝ち。3ターンごとに、予告された段がだるま落としで抜ける！">
+<title>4つ目のダルマ</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="4つ目のダルマ">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ===== タイトル ===== -->
+  <section id="title" class="screen active">
+    <div class="title-box">
+      <canvas id="logo-canvas" aria-hidden="true"></canvas>
+      <h1 class="logo"><small>4つ目の</small>ダルマ</h1>
+      <p class="tagline">交互に落として、4つ並べたら勝ち。<br>でも3ターンごとに、<b>だるま落とし</b>で段が抜ける。</p>
+      <div class="menu">
+        <div class="menu-card">
+          <p class="menu-label">CPUとたいせん</p>
+          <div class="level-row">
+            <button class="btn lv" data-level="easy">よわい</button>
+            <button class="btn lv" data-level="normal">ふつう</button>
+            <button class="btn lv" data-level="hard">つよい</button>
+          </div>
+        </div>
+        <button class="btn wide red" id="btn-local">ふたりで（この端末）</button>
+        <button class="btn wide indigo" id="btn-online">あいことばで対戦</button>
+        <div class="menu-sub">
+          <button class="btn sub" id="btn-howto">あそびかた</button>
+          <a class="btn sub" href="https://nasubi-no-oniwa.github.io/">なすびのお庭へ</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ゲーム ===== -->
+  <section id="game" class="screen">
+    <header class="hud">
+      <button class="icon-btn" id="btn-menu" aria-label="メニュー">☰</button>
+      <span class="hud-title">4つ目のダルマ</span>
+      <button class="icon-btn" id="btn-sound" aria-label="音">♪</button>
+    </header>
+    <div class="stage">
+      <div class="players">
+        <div class="pcard p1" id="pl1"><canvas class="pface" data-p="1" width="96" height="96"></canvas><div><span class="pname" id="name1">あなた</span><span class="pwins"><b id="wins1">0</b> 勝</span></div></div>
+        <span class="vs">VS</span>
+        <div class="pcard p2" id="pl2"><div><span class="pname" id="name2">CPU</span><span class="pwins"><b id="wins2">0</b> 勝</span></div><canvas class="pface" data-p="2" width="96" height="96"></canvas></div>
+      </div>
+      <div class="status" id="status">あなたの番</div>
+      <div class="board-area" id="board-area">
+        <canvas id="board"></canvas>
+      </div>
+      <div class="hammer-bar" id="hammer-bar"><span class="hb-icon">🔨</span><span id="hammer-text">だるま落としまで あと3ターン</span><span class="hb-dots" id="hammer-dots"></span></div>
+      <p class="hint-line" id="hint-line">落としたい列をタップ</p>
+    </div>
+    <span id="wins" hidden>0 - 0</span>
+    <span class="eyes" id="watchers"></span>
+
+    <div class="overlay" id="ov-result">
+      <div class="dialog">
+        <canvas id="result-daruma" width="120" height="120" aria-hidden="true"></canvas>
+        <h2 id="result-title">赤の勝ち！</h2>
+        <p class="result-sub" id="result-sub"></p>
+        <button class="btn wide red" id="btn-again">もう一回</button>
+        <p class="hint" id="again-msg"></p>
+        <button class="btn wide sub" id="btn-back">タイトルへ</button>
+      </div>
+    </div>
+    <div class="overlay" id="ov-menu">
+      <div class="dialog">
+        <h2>メニュー</h2>
+        <button class="btn wide" id="btn-resume">もどる</button>
+        <button class="btn wide sub" id="btn-howto2">あそびかた</button>
+        <button class="btn wide sub" id="btn-quit">タイトルへ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 合言葉 ===== -->
+  <div class="overlay modal" id="ov-online">
+    <div class="dialog">
+      <h2>あいことばで対戦</h2>
+      <div id="online-form">
+        <label class="field-l">あいことば<input id="in-code" maxlength="20" autocomplete="off" placeholder="例：だるま123"></label>
+        <label class="field-l">なまえ<input id="in-name" maxlength="8" autocomplete="off" placeholder="ななし"></label>
+        <p class="hint">同じあいことばを入れた人と対戦。3人目からは観戦になります。</p>
+        <button class="btn wide red" id="btn-join">はいる</button>
+      </div>
+      <div id="online-wait" hidden>
+        <p class="wait-code">あいことば「<b id="wait-code"></b>」</p>
+        <p class="wait-msg" id="wait-msg">あいてを待っています…</p>
+        <button class="btn wide sub" id="btn-copy">さそうリンクをコピー</button>
+      </div>
+      <p class="err" id="online-err"></p>
+      <button class="btn wide sub" id="btn-online-close">もどる</button>
+    </div>
+  </div>
+
+  <!-- ===== あそびかた ===== -->
+  <div class="overlay modal" id="ov-howto">
+    <div class="dialog howto">
+      <h2>あそびかた</h2>
+      <ol>
+        <li>赤と青が<b>交互に</b>、好きな列の上からダルマを落とす。</li>
+        <li>縦・横・ななめのどれかで<b>4つ並べたら勝ち</b>。</li>
+        <li>2人が1回ずつ落として1ターン。<b>3ターンごとに、小槌が指している段がだるま落としで抜けて</b>、上のダルマがストンと落ちる。</li>
+        <li>小槌の下の数字は「あと何ターンで抜けるか」。下の段ほど選ばれやすい。</li>
+        <li>抜けた拍子に2人とも4つ並んだら、<b>並んだ列が多いほうの勝ち</b>。同じ数なら、並んだダルマが全部消えて続行（サドンデス）。</li>
+      </ol>
+      <div class="howto-keys">
+        <div><h3>スマホ</h3><p>落としたい列をタップ</p></div>
+        <div><h3>PC</h3><p>列をクリック<br>または ← → で選んで スペース<br>数字キー 1〜7 でも落とせる</p></div>
+      </div>
+      <button class="btn wide" id="btn-howto-close">とじる</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/game.js"></script>
+<script src="js/cpu.js"></script>
+<script src="js/render.js"></script>
+<script src="js/online.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
