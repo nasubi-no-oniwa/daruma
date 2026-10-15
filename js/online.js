@@ -17,7 +17,7 @@
     constructor(db, code, name, cb) {
       this.db = db;
       this.code = clean(code);
-      this.name = (String(name || '').trim().slice(0, 8)) || 'ななし';
+      this.name = (window.QM ? QM.ng(name) : String(name || '').trim().slice(0, 8)) || 'ななし';
       this.cb = cb || {};
       this.id = uid();
       this.slot = -1;
@@ -69,7 +69,7 @@
     }
 
     people() {
-      const names = [0, 1].map(s => (this.players[s] ? this.players[s].name : null));
+      const names = [0, 1].map(s => (this.players[s] ? (window.QM ? QM.ng(this.players[s].name) : this.players[s].name) : null));
       return { names, watchers: Object.keys(this.watchers).length, slot: this.slot };
     }
 

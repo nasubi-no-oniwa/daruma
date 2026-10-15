@@ -64,7 +64,7 @@
 
   // ---------- 試合の開始 ----------
   function startGame(opts) {
-    st.gameNo++;
+    st.gameNo++; st.leftNote = "";
     const first = opts.first || 1;
     st.game = new DG.Game(opts.seed != null ? opts.seed : (Math.random() * 2147483647) | 0, first);
     st.view = st.game.clone();
@@ -273,9 +273,9 @@
     setTimeout(() => {
       if (st.game !== g) return;
       $('#result-title').textContent = title;
-      $('#result-sub').textContent = sub;
+      $('#result-sub').textContent = sub || st.leftNote || '';
       $('#again-msg').textContent = st.watch ? '次の試合が始まるまで待っています…' : '';
-      $('#btn-again').disabled = false;
+      $('#btn-again').disabled = false; $('#btn-again').style.display = st.leftNote ? 'none' : '';
       const rc = $('#result-daruma'), rx = rc.getContext('2d');
       rx.clearRect(0, 0, 120, 120);
       if (g.winner === 3) { DG.drawDaruma(rx, 38, 64, 30, 1); DG.drawDaruma(rx, 82, 64, 30, 2); }
@@ -319,6 +319,7 @@
 
   function toTitle() {
     if (st.room) { st.room.leave(); st.room = null; }
+    QM.ended();
     setOnline(false);
     st.game = null; st.over = true;
     overlay('#ov-result', false); overlay('#ov-menu', false);
@@ -355,7 +356,7 @@
     try { $('#in-name').value = localStorage.getItem('daruma-name') || ''; } catch (e) {}
     overlay('#ov-online', true);
   });
-  $('#btn-online-close').addEventListener('click', () => { if (st.room) { st.room.leave(); st.room = null; } overlay('#ov-online', false); });
+  $('#btn-online-close').addEventListener('click', () => { if (st.room) { st.room.leave(); st.room = null; } QM.ended(); overlay('#ov-online', false); });
   $('#btn-copy').addEventListener('click', async () => {
     const url = location.origin + location.pathname + '?room=' + encodeURIComponent(st.room ? st.room.code : '');
     try { await navigator.clipboard.writeText(url); $('#btn-copy').textContent = 'コピーしました！'; }
@@ -386,8 +387,8 @@
           // 相手がいなくなった
           st.game.winner = r.loser === 0 ? 2 : 1;
           st.busy = false;
+          st.leftNote = QM.isRandom() ? '相手が抜けたので、あなたの勝ち！' : 'あいてが退室しました';
           finish(null);
-          $('#result-sub').textContent = 'あいてが退室しました';
         }
       });
       st.room = room;
@@ -405,6 +406,7 @@
   }
 
   function onlineStart(g) {
+    QM.started({ code: st.room && st.room.code, watch: g.slot < 0 });
     const names = g.names.map(n => n || '？');
     st.mode = 'online';
     st.names = { 1: names[0], 2: names[1] };
@@ -447,6 +449,17 @@
       if (L.length) requestMove(L[Math.floor(Math.random() * L.length)]);
     }
   }, 1000);
+
+  // ---------- だれかと対戦（ランダム対戦） ----------
+  QM.setup({
+    game: 'daruma', ver: 'v1', name: '4つ目のダルマ',
+    getDb, anchor: '#btn-online', anchorWhere: 'before', btnClass: 'btn wide indigo', nextClass: 'btn wide', nameKey: 'daruma-name',
+    join: (code, name) => { Sound.init(); $('#in-code').value = code; $('#in-name').value = name; joinOnline(); },
+    cpu: () => document.querySelector('[data-level="normal"]').click(), cpuLabel: 'CPU（ふつう）と遊びながら待つ',
+    quit: toTitle,
+    colors: { main: 'var(--red)', alt: 'var(--indigo)', bg: 'var(--card)', fg: 'var(--ink)' },
+  });
+  QM.resultSlot('#ov-result .dialog', '#btn-back');
 
   (function () {
     const q = new URLSearchParams(location.search).get('room');
