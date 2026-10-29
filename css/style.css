@@ -159,3 +159,9 @@ body.watching .hint-line { visibility: hidden; }
 
 .hammer-bar { white-space: nowrap; max-width: 100%; }
 #hammer-text { overflow: hidden; text-overflow: ellipsis; }
+
+/* ことばの切りかえ */
+.langs{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:14px}
+.langs button{font:800 13px 'M PLUS Rounded 1c',sans-serif;background:transparent;color:#3b2a20;border:2px solid rgba(59,42,32,.45);border-radius:999px;padding:4px 12px;cursor:pointer}
+.langs button[aria-pressed="true"]{background:#3b2a20;color:#fff;border-color:#3b2a20}
+html[data-lang="ko"] .logo,html[data-lang="ko"] .hud-title{font-family:'Black Han Sans','Dela Gothic One',sans-serif;font-weight:400}

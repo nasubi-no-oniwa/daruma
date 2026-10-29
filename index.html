@@ -24,23 +24,24 @@
   <section id="title" class="screen active">
     <div class="title-box">
       <canvas id="logo-canvas" aria-hidden="true"></canvas>
-      <h1 class="logo"><small>4つ目の</small>ダルマ</h1>
-      <p class="tagline">交互に落として、4つ並べたら勝ち。<br>でも3ターンごとに、<b>だるま落とし</b>で段が抜ける。</p>
+      <h1 class="logo" data-ih="logo"><small>4つ目の</small>ダルマ</h1>
+      <p class="tagline" data-ih="tagline">交互に落として、4つ並べたら勝ち。<br>でも3ターンごとに、<b>だるま落とし</b>で段が抜ける。</p>
       <div class="menu">
         <div class="menu-card">
-          <p class="menu-label">CPUとたいせん</p>
+          <p class="menu-label" data-i="vs_cpu">CPUとたいせん</p>
           <div class="level-row">
-            <button class="btn lv" data-level="easy">よわい</button>
-            <button class="btn lv" data-level="normal">ふつう</button>
-            <button class="btn lv" data-level="hard">つよい</button>
+            <button class="btn lv" data-level="easy" data-i="easy">よわい</button>
+            <button class="btn lv" data-level="normal" data-i="normal">ふつう</button>
+            <button class="btn lv" data-level="hard" data-i="hard">つよい</button>
           </div>
         </div>
-        <button class="btn wide red" id="btn-local">ふたりで（この端末）</button>
-        <button class="btn wide indigo" id="btn-online">あいことばで対戦</button>
+        <button class="btn wide red" id="btn-local" data-i="local">ふたりで（この端末）</button>
+        <button class="btn wide indigo" id="btn-online" data-i="online">あいことばで対戦</button>
         <div class="menu-sub">
-          <button class="btn sub" id="btn-howto">あそびかた</button>
-          <a class="btn sub" href="https://nasubi-no-oniwa.github.io/">なすびのお庭へ</a>
+          <button class="btn sub" id="btn-howto" data-i="howto">あそびかた</button>
+          <a class="btn sub" href="https://nasubi-no-oniwa.github.io/" data-i="home">なすびのお庭へ</a>
         </div>
+        <div class="langs" role="group" aria-label="Language"><button type="button" data-lang="ja">日本語</button><button type="button" data-lang="en">English</button><button type="button" data-lang="zh">繁中</button><button type="button" data-lang="ko">한국어</button></div>
       </div>
     </div>
   </section>
@@ -49,14 +50,14 @@
   <section id="game" class="screen">
     <header class="hud">
       <button class="icon-btn" id="btn-menu" aria-label="メニュー">☰</button>
-      <span class="hud-title">4つ目のダルマ</span>
+      <span class="hud-title" data-i="doc_title">4つ目のダルマ</span>
       <button class="icon-btn" id="btn-sound" aria-label="音">♪</button>
     </header>
     <div class="stage">
       <div class="players">
-        <div class="pcard p1" id="pl1"><canvas class="pface" data-p="1" width="96" height="96"></canvas><div><span class="pname" id="name1">あなた</span><span class="pwins"><b id="wins1">0</b> 勝</span></div></div>
+        <div class="pcard p1" id="pl1"><canvas class="pface" data-p="1" width="96" height="96"></canvas><div><span class="pname" id="name1">あなた</span><span class="pwins"><b id="wins1">0</b><span data-i="wins_u"> 勝</span></span></div></div>
         <span class="vs">VS</span>
-        <div class="pcard p2" id="pl2"><div><span class="pname" id="name2">CPU</span><span class="pwins"><b id="wins2">0</b> 勝</span></div><canvas class="pface" data-p="2" width="96" height="96"></canvas></div>
+        <div class="pcard p2" id="pl2"><div><span class="pname" id="name2">CPU</span><span class="pwins"><b id="wins2">0</b><span data-i="wins_u"> 勝</span></span></div><canvas class="pface" data-p="2" width="96" height="96"></canvas></div>
       </div>
       <div class="status" id="status">あなたの番</div>
       <div class="board-area" id="board-area">
@@ -73,17 +74,17 @@
         <canvas id="result-daruma" width="120" height="120" aria-hidden="true"></canvas>
         <h2 id="result-title">赤の勝ち！</h2>
         <p class="result-sub" id="result-sub"></p>
-        <button class="btn wide red" id="btn-again">もう一回</button>
+        <button class="btn wide red" id="btn-again" data-i="again">もう一回</button>
         <p class="hint" id="again-msg"></p>
-        <button class="btn wide sub" id="btn-back">タイトルへ</button>
+        <button class="btn wide sub" id="btn-back" data-i="to_title">タイトルへ</button>
       </div>
     </div>
     <div class="overlay" id="ov-menu">
       <div class="dialog">
-        <h2>メニュー</h2>
-        <button class="btn wide" id="btn-resume">もどる</button>
-        <button class="btn wide sub" id="btn-howto2">あそびかた</button>
-        <button class="btn wide sub" id="btn-quit">タイトルへ</button>
+        <h2 data-i="menu">メニュー</h2>
+        <button class="btn wide" id="btn-resume" data-i="back">もどる</button>
+        <button class="btn wide sub" id="btn-howto2" data-i="howto">あそびかた</button>
+        <button class="btn wide sub" id="btn-quit" data-i="to_title">タイトルへ</button>
       </div>
     </div>
   </section>
@@ -91,43 +92,44 @@
   <!-- ===== 合言葉 ===== -->
   <div class="overlay modal" id="ov-online">
     <div class="dialog">
-      <h2>あいことばで対戦</h2>
+      <h2 data-i="online">あいことばで対戦</h2>
       <div id="online-form">
-        <label class="field-l">あいことば<input id="in-code" maxlength="20" autocomplete="off" placeholder="例：だるま123"></label>
-        <label class="field-l">なまえ<input id="in-name" maxlength="8" autocomplete="off" placeholder="ななし"></label>
-        <p class="hint">同じあいことばを入れた人と対戦。3人目からは観戦になります。</p>
-        <button class="btn wide red" id="btn-join">はいる</button>
+        <label class="field-l"><span data-i="passcode">あいことば</span><input id="in-code" maxlength="20" autocomplete="off" placeholder="例：だるま123" data-ip="ex_code"></label>
+        <label class="field-l"><span data-i="name">なまえ</span><input id="in-name" maxlength="8" autocomplete="off" placeholder="ななし" data-ip="noname"></label>
+        <p class="hint" data-i="online_hint">同じあいことばを入れた人と対戦。3人目からは観戦になります。</p>
+        <button class="btn wide red" id="btn-join" data-i="join">はいる</button>
       </div>
       <div id="online-wait" hidden>
-        <p class="wait-code">あいことば「<b id="wait-code"></b>」</p>
-        <p class="wait-msg" id="wait-msg">あいてを待っています…</p>
-        <button class="btn wide sub" id="btn-copy">さそうリンクをコピー</button>
+        <p class="wait-code"><span data-i="wait_pre">あいことば「</span><b id="wait-code"></b><span data-i="wait_post">」</span></p>
+        <p class="wait-msg" id="wait-msg" data-i="waiting">あいてを待っています…</p>
+        <button class="btn wide sub" id="btn-copy" data-i="copy_link">さそうリンクをコピー</button>
       </div>
       <p class="err" id="online-err"></p>
-      <button class="btn wide sub" id="btn-online-close">もどる</button>
+      <button class="btn wide sub" id="btn-online-close" data-i="back">もどる</button>
     </div>
   </div>
 
   <!-- ===== あそびかた ===== -->
   <div class="overlay modal" id="ov-howto">
     <div class="dialog howto">
-      <h2>あそびかた</h2>
+      <h2 data-i="howto">あそびかた</h2>
       <ol>
-        <li>赤と青が<b>交互に</b>、好きな列の上からダルマを落とす。</li>
-        <li>縦・横・ななめのどれかで<b>4つ並べたら勝ち</b>。</li>
-        <li>2人が1回ずつ落として1ターン。<b>3ターンごとに、小槌が指している段がだるま落としで抜けて</b>、上のダルマがストンと落ちる。</li>
-        <li>小槌の下の数字は「あと何ターンで抜けるか」。下の段ほど選ばれやすい。</li>
-        <li>抜けた拍子に2人とも4つ並んだら、<b>並んだ列が多いほうの勝ち</b>。同じ数なら、並んだダルマが全部消えて続行（サドンデス）。</li>
+        <li data-ih="h1">赤と青が<b>交互に</b>、好きな列の上からダルマを落とす。</li>
+        <li data-ih="h2">縦・横・ななめのどれかで<b>4つ並べたら勝ち</b>。</li>
+        <li data-ih="h3">2人が1回ずつ落として1ターン。<b>3ターンごとに、小槌が指している段がだるま落としで抜けて</b>、上のダルマがストンと落ちる。</li>
+        <li data-ih="h4">小槌の下の数字は「あと何ターンで抜けるか」。下の段ほど選ばれやすい。</li>
+        <li data-ih="h5">抜けた拍子に2人とも4つ並んだら、<b>並んだ列が多いほうの勝ち</b>。同じ数なら、並んだダルマが全部消えて続行（サドンデス）。</li>
       </ol>
       <div class="howto-keys">
-        <div><h3>スマホ</h3><p>落としたい列をタップ</p></div>
-        <div><h3>PC</h3><p>列をクリック<br>または ← → で選んで スペース<br>数字キー 1〜7 でも落とせる</p></div>
+        <div><h3 data-i="k_phone">スマホ</h3><p data-i="k_phone_d">落としたい列をタップ</p></div>
+        <div><h3>PC</h3><p data-ih="k_pc_d">列をクリック<br>または ← → で選んで スペース<br>数字キー 1〜7 でも落とせる</p></div>
       </div>
-      <button class="btn wide" id="btn-howto-close">とじる</button>
+      <button class="btn wide" id="btn-howto-close" data-i="close">とじる</button>
     </div>
   </div>
 </div>
 
+<script src="js/i18n.js"></script>
 <script src="js/config.js"></script>
 <script src="js/game.js"></script>
 <script src="js/cpu.js"></script>

@@ -4,7 +4,8 @@
 (function () {
   const C = DG.CONFIG;
   const $ = s => document.querySelector(s);
-  const LEVEL_NAME = { easy: 'CPU よわい', normal: 'CPU ふつう', hard: 'CPU つよい' };
+  const T = I18N.t;
+  const levelName = lv => T('cpu_' + lv);
 
   // ---------- 効果音（ファイル不要） ----------
   const Sound = {
@@ -34,7 +35,7 @@
   const st = {
     screen: 'title', mode: 'cpu', level: 'normal',
     game: null, view: null, busy: false, fx: {}, hoverCol: -1,
-    control: { 1: 'me', 2: 'cpu' }, names: { 1: 'あなた', 2: 'CPU' }, wins: { 1: 0, 2: 0 },
+    control: { 1: 'me', 2: 'cpu' }, names: { 1: T('you'), 2: 'CPU' }, wins: { 1: 0, 2: 0 },
     gameNo: 0, room: null, watch: false, queue: [], turnStart: 0, over: false
   };
   DG.state = st; // デバッグ用
@@ -73,7 +74,7 @@
     $('#name1').textContent = st.names[1]; $('#name2').textContent = st.names[2];
     showWins();
     show('game');
-    label('スタート！', '#ffd46b', 900);
+    label(T('start'), '#ffd46b', 900);
     updateStatus();
     nextTurn();
   }
@@ -98,10 +99,10 @@
   function updateHammerBar() {
     const v = st.view; if (!v) return;
     const left = v.roundsLeft, row = v.nextRow;
-    const rowName = row === 0 ? 'いちばん下' : '下から' + (row + 1) + '段目';
+    const rowName = row === 0 ? T('row_bottom') : T('row_n', { n: row + 1 });
     const bar = $('#hammer-bar');
-    if (st.game && st.game.winner) { $('#hammer-text').textContent = 'だるま落としまで —'; bar.classList.remove('soon'); return; }
-    $('#hammer-text').textContent = left === 1 ? 'このターンで ' + rowName + 'が抜ける！' : 'あと' + left + 'ターンで ' + rowName + 'が抜ける';
+    if (st.game && st.game.winner) { $('#hammer-text').textContent = T('hammer_none'); bar.classList.remove('soon'); return; }
+    $('#hammer-text').textContent = left === 1 ? T('hammer_now', { row: rowName }) : T('hammer_left', { n: left, row: rowName });
     bar.classList.toggle('soon', left === 1);
     $('#hammer-dots').innerHTML = [0, 1, 2].map(i => '<i class="' + (i < C.HAMMER_EVERY - left ? 'on' : '') + '"></i>').join('');
   }
@@ -113,13 +114,13 @@
     if (g.winner) return;
     const who = st.control[g.turn];
     let text;
-    if (st.watch) text = st.names[g.turn] + ' の番';
-    else if (who === 'me') text = 'あなたの番';
-    else if (who === 'cpu') text = 'CPUが考え中…';
-    else if (who === 'local') text = st.names[g.turn] + 'の番';
-    else text = st.names[g.turn] + ' の番';
+    if (st.watch) text = T('turn_of', { name: st.names[g.turn] });
+    else if (who === 'me') text = T('your_turn');
+    else if (who === 'cpu') text = T('cpu_thinking');
+    else if (who === 'local') text = T('turn_of', { name: st.names[g.turn] });
+    else text = T('turn_of', { name: st.names[g.turn] });
     $('#status').innerHTML = text + (st.mode === 'online' ? ' <span class="t" id="timer"></span>' : '');
-    $('#hint-line').textContent = isMyTurn() || (who === 'me') ? '落としたい列をタップ' : '';
+    $('#hint-line').textContent = isMyTurn() || (who === 'me') ? T('k_phone_d') : '';
   }
 
   function nextTurn() {
@@ -196,7 +197,7 @@
       } else if (ev.type === 'hammer') {
         await doHammer(ev, v);
       } else if (ev.type === 'sudden') {
-        label('サドンデス！', '#ffffff', 1200);
+        label(T('sudden'), '#ffffff', 1200);
         const map = {}; for (const [cc, r] of ev.cells) map[cc + ',' + r] = 1;
         st.fx.win = map;
         await wait(700);
@@ -221,7 +222,7 @@
 
   async function doHammer(ev, v) {
     st.fx.hammerRow = ev.row;
-    label('だるま落とし！', '#ffd46b', 1100);
+    label(T('hammer_label'), '#ffd46b', 1100);
     let knocked = false;
     st.fx.hammer = { t: 0 };
     await tween(C.HAMMER_TIME, t => {
@@ -256,25 +257,25 @@
     const g = st.game;
     st.over = true;
     let title, sub = '';
-    if (g.winner === 3) { title = '引き分け'; }
+    if (g.winner === 3) { title = T('draw'); }
     else {
       st.wins[g.winner]++;
       const nm = st.names[g.winner];
-      if (st.mode === 'cpu') title = g.winner === 1 ? 'あなたの勝ち！' : 'CPUの勝ち…';
-      else if (st.mode === 'online' && !st.watch) title = st.control[g.winner] === 'me' ? 'あなたの勝ち！' : nm + ' の勝ち…';
-      else title = nm + ' の勝ち！';
-      if (winEv && winEv.byHammer) sub = 'だるま落としで勝負がついた！（' + winEv.count[0] + ' 対 ' + winEv.count[1] + '）';
+      if (st.mode === 'cpu') title = g.winner === 1 ? T('you_win') : T('cpu_win');
+      else if (st.mode === 'online' && !st.watch) title = st.control[g.winner] === 'me' ? T('you_win') : T('x_wins_sad', { name: nm });
+      else title = T('x_wins', { name: nm });
+      if (winEv && winEv.byHammer) sub = T('by_hammer', { a: winEv.count[0], b: winEv.count[1] });
     }
     showWins();
     const good = g.winner !== 3 && (st.mode === 'local' || st.watch || st.control[g.winner] === 'me');
     good ? Sound.win() : Sound.lose();
     updateStatus();
-    $('#status').textContent = g.winner === 3 ? '引き分け' : st.names[g.winner] + ' が4つそろえた！';
+    $('#status').textContent = g.winner === 3 ? T('draw') : T('lined', { name: st.names[g.winner] });
     setTimeout(() => {
       if (st.game !== g) return;
       $('#result-title').textContent = title;
       $('#result-sub').textContent = sub || st.leftNote || '';
-      $('#again-msg').textContent = st.watch ? '次の試合が始まるまで待っています…' : '';
+      $('#again-msg').textContent = st.watch ? T('wait_next') : '';
       $('#btn-again').disabled = false; $('#btn-again').style.display = st.leftNote ? 'none' : '';
       const rc = $('#result-daruma'), rx = rc.getContext('2d');
       rx.clearRect(0, 0, 120, 120);
@@ -289,14 +290,14 @@
     Sound.init();
     setOnline(false);
     st.mode = 'cpu'; st.level = b.dataset.level;
-    st.control = { 1: 'me', 2: 'cpu' }; st.names = { 1: 'あなた', 2: LEVEL_NAME[st.level] }; st.wins = { 1: 0, 2: 0 }; st.gameNo = 0;
+    st.control = { 1: 'me', 2: 'cpu' }; st.names = { 1: T('you'), 2: levelName(st.level) }; st.wins = { 1: 0, 2: 0 }; st.gameNo = 0;
     startGame({ first: 1 });
   }));
   $('#btn-local').addEventListener('click', () => {
     Sound.init();
     setOnline(false);
     st.mode = 'local';
-    st.control = { 1: 'local', 2: 'local' }; st.names = { 1: '赤', 2: '青' }; st.wins = { 1: 0, 2: 0 }; st.gameNo = 0;
+    st.control = { 1: 'local', 2: 'local' }; st.names = { 1: T('red'), 2: T('blue') }; st.wins = { 1: 0, 2: 0 }; st.gameNo = 0;
     startGame({ first: 1 });
   });
   $('#btn-again').addEventListener('click', () => {
@@ -305,7 +306,7 @@
       if (st.watch) return;
       st.room.rematch();
       $('#btn-again').disabled = true;
-      $('#again-msg').textContent = 'あいての「もう一回」を待っています…';
+      $('#again-msg').textContent = T('wait_rematch');
     } else startGame({ first: st.gameNo % 2 === 0 ? 1 : 2 });
   });
   $('#btn-back').addEventListener('click', toTitle);
@@ -336,13 +337,13 @@
   function loadScript(src) {
     return new Promise((res, rej) => {
       const el = document.createElement('script');
-      el.src = src; el.onload = res; el.onerror = () => rej(new Error('通信できませんでした。電波のよいところでもう一度ためしてください'));
+      el.src = src; el.onload = res; el.onerror = () => rej(new Error(T('err_net')));
       document.head.appendChild(el);
     });
   }
   async function getDb() {
     if (DG._db) return DG._db;
-    if (!DG.FIREBASE_CONFIG) throw new Error('オンライン対戦はまだ準備中です');
+    if (!DG.FIREBASE_CONFIG) throw new Error(T('err_notready'));
     const v = '10.12.2';
     await loadScript('https://www.gstatic.com/firebasejs/' + v + '/firebase-app-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/' + v + '/firebase-database-compat.js');
@@ -359,26 +360,26 @@
   $('#btn-online-close').addEventListener('click', () => { if (st.room) { st.room.leave(); st.room = null; } QM.ended(); overlay('#ov-online', false); });
   $('#btn-copy').addEventListener('click', async () => {
     const url = location.origin + location.pathname + '?room=' + encodeURIComponent(st.room ? st.room.code : '');
-    try { await navigator.clipboard.writeText(url); $('#btn-copy').textContent = 'コピーしました！'; }
-    catch (e) { prompt('このリンクを送ってください', url); }
-    setTimeout(() => { $('#btn-copy').textContent = 'さそうリンクをコピー'; }, 2000);
+    try { await navigator.clipboard.writeText(url); $('#btn-copy').textContent = T('copied'); }
+    catch (e) { prompt(T('send_link'), url); }
+    setTimeout(() => { $('#btn-copy').textContent = T('copy_link'); }, 2000);
   });
   $('#btn-join').addEventListener('click', joinOnline);
   $('#in-code').addEventListener('keydown', e => { if (e.key === 'Enter') joinOnline(); });
 
   async function joinOnline() {
     const code = DG.cleanCode($('#in-code').value);
-    const name = $('#in-name').value.trim().slice(0, 8) || 'ななし';
-    if (!code) { $('#online-err').textContent = 'あいことばを入れてください（. # $ / [ ] は使えません）'; return; }
+    const name = $('#in-name').value.trim().slice(0, 8) || T('noname');
+    if (!code) { $('#online-err').textContent = T('err_code'); return; }
     try { localStorage.setItem('daruma-name', name); } catch (e) {}
-    $('#online-err').textContent = ''; $('#btn-join').disabled = true; $('#btn-join').textContent = 'つないでいます…';
+    $('#online-err').textContent = ''; $('#btn-join').disabled = true; $('#btn-join').textContent = T('connecting');
     try {
       const db = await getDb();
       st.wins = { 1: 0, 2: 0 }; st.gameNo = 0;
       const room = new DG.OnlineRoom(db, code, name, {
         onPeople: p => {
-          $('#watchers').textContent = p.watchers ? '👀 ' + p.watchers + '人が観戦中' : '';
-          if (room.slot >= 0 && !p.names[1 - room.slot]) $('#wait-msg').textContent = 'あいてを待っています…';
+          $('#watchers').textContent = p.watchers ? T('watchers', { n: p.watchers }) : '';
+          if (room.slot >= 0 && !p.names[1 - room.slot]) $('#wait-msg').textContent = T('waiting');
         },
         onStart: onlineStart,
         onMove: m => { st.queue.push(m); runQueue(); },
@@ -387,7 +388,7 @@
           // 相手がいなくなった
           st.game.winner = r.loser === 0 ? 2 : 1;
           st.busy = false;
-          st.leftNote = QM.isRandom() ? '相手が抜けたので、あなたの勝ち！' : 'あいてが退室しました';
+          st.leftNote = QM.isRandom() ? T('left_win') : T('left');
           finish(null);
         }
       });
@@ -396,13 +397,13 @@
       st.mode = 'online';
       setOnline(true, room.slot < 0);
       $('#wait-code').textContent = room.code;
-      $('#wait-msg').textContent = room.slot < 0 ? '観戦で入りました。試合が始まるのを待っています…' : 'あいてを待っています…';
+      $('#wait-msg').textContent = room.slot < 0 ? T('watch_in') : T('waiting');
       lobby(true);
     } catch (e) {
-      $('#online-err').textContent = e.message || 'つながりませんでした';
+      $('#online-err').textContent = e.message || T('err_conn');
       if (st.room) { st.room.leave(); st.room = null; }
     }
-    $('#btn-join').disabled = false; $('#btn-join').textContent = 'はいる';
+    $('#btn-join').disabled = false; $('#btn-join').textContent = T('join');
   }
 
   function onlineStart(g) {
@@ -442,7 +443,7 @@
   setInterval(() => {
     if (st.mode !== 'online' || !st.game || st.game.winner || st.busy || st.over) return;
     const left = Math.max(0, C.TURN_TIME - Math.floor((performance.now() - st.turnStart) / 1000));
-    const el = $('#timer'); if (el) el.textContent = 'のこり ' + left + '秒';
+    const el = $('#timer'); if (el) el.textContent = T('timer', { n: left });
     if (left <= 5 && left > 0 && st.control[st.game.turn] === 'me') Sound.tick();
     if (left === 0 && st.control[st.game.turn] === 'me') {
       const L = st.game.legal();
@@ -455,7 +456,7 @@
     game: 'daruma', ver: 'v1', name: '4つ目のダルマ',
     getDb, anchor: '#btn-online', anchorWhere: 'before', btnClass: 'btn wide indigo', nextClass: 'btn wide', nameKey: 'daruma-name',
     join: (code, name) => { Sound.init(); $('#in-code').value = code; $('#in-name').value = name; joinOnline(); },
-    cpu: () => document.querySelector('[data-level="normal"]').click(), cpuLabel: 'CPU（ふつう）と遊びながら待つ',
+    cpu: () => document.querySelector('[data-level="normal"]').click(), cpuLabel: () => T('cpu_wait_label'),
     quit: toTitle,
     colors: { main: 'var(--red)', alt: 'var(--indigo)', bg: 'var(--card)', fg: 'var(--ink)' },
   });
